@@ -1,0 +1,9 @@
+{
+    "path" : "~/dm-uiuc/dataviz/nfl-gv",
+    "sortOrder" : [
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        }
+    ]
+}
