@@ -4,9 +4,12 @@
 #' @import V8
 #' @export
 buildGraph <- function(movs, teams) {
-  nodes <- create_nodes(nodes = teams$winner, 
+  nodes <- create_nodes(nodes = teams$team, 
+                        color = teams$secondary, 
+                        fillcolor = teams$primary, 
+                        penwidth = 10,
                         label = FALSE,
-                        tooltip = teams$winner, 
+                        tooltip = teams$team, 
                         width = scale_1_10(teams$pts) / 5)
   
   edges <- create_edges(from = movs$winner, 
@@ -18,8 +21,7 @@ buildGraph <- function(movs, teams) {
                        edge_attr = "penwidth",
                        range = c(1, 5))
   
-  node_attrs <- c("style = filled", "fillcolor = cadetblue",
-                  "color = gray", "shape = circle", 
+  node_attrs <- c("style = filled", "shape = circle", 
                   "fontname = Helvetica")
   
   edge_attrs <- c("arrowhead = vee", 
@@ -36,9 +38,8 @@ buildGraph <- function(movs, teams) {
                edges_df = edges,
                graph_attrs = graph_attrs, 
                node_attrs = node_attrs,
-               edge_attrs = edge_attrs) %>%
+               edge_attrs = edge_attrs, 
+               graph_name = 'NFL 2014') %>%
     render_graph(output = 'SVG', width = 800, height = 800) %>%
     cat(file = 'graph.svg')
 }
-
-
