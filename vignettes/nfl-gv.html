@@ -203,10 +203,16 @@ hr {
 <body>
 <h2>NFL 2014 Season with GraphViz and DiagrammeR</h2>
 
-<pre><code class="r"># library(nflgv)
-# args &lt;- loadData()
-# buildGraph(args$movs, args$teams)
-</code></pre>
+<p>Hover over nodes to see teams and over edges to see games. Nodes 
+are color-coded according to team colors. </p>
+
+<p>Nodes are scaled according to cumulative percentage margin for the 
+whole season, that is, margin of victory as a percentage of total 
+points scored in each game, a measure intended to correct for the 
+bias toward offense in pure margin of victory. </p>
+
+<p>Edges are scaled according to the percent margin of victory for 
+each game. </p>
 
 <!--html_preserve-->
 
@@ -216,6 +222,92 @@ hr {
 <!--/html_preserve-->
 
 <p>Colors from <a href="http://teamcolorcodes.com/category/nfl-team-color-codes/">NFL Team Colors Codes</a></p>
+
+<p>Season data from <a href="http://pro-football-reference.com">Pro Football Reference</a></p>
+
+<h2>Code</h2>
+
+<pre><code class="r">#&#39; loadData
+#&#39; 
+#&#39; @importFrom dplyr transmute
+#&#39; @importFrom dplyr select
+#&#39; @importFrom dplyr left_join
+#&#39; @importFrom magrittr %&gt;%
+#&#39; @export
+loadData &lt;- function() {
+  pointFile &lt;- system.file(&#39;extdata&#39;, &#39;nfl2014.csv&#39;, 
+                           package = &#39;nflgv&#39;)
+  colorFile &lt;- system.file(&#39;extdata&#39;, &#39;nfl_team_colors.csv&#39;, 
+                           package = &#39;nflgv&#39;)
+
+  nfl2014 &lt;- read.csv(pointFile, stringsAsFactors = FALSE) %&gt;%
+    transmute(week = Week, winner = Winner, loser = Loser, 
+              # percent_margin prevents favoring high scores
+              pts = percent_margin(PtsW, PtsL))
+
+  colors &lt;- read.csv(colorFile, stringsAsFactors = FALSE)
+
+  movs &lt;- aggregate(pts ~ winner + loser, 
+                    data = select(nfl2014, winner, loser, pts),
+                    mean)
+
+  teams &lt;- aggregate(pts ~ winner, data = movs, sum) %&gt;%
+    rename(team = winner) %&gt;%
+    left_join(colors)
+
+  return(list(movs = movs, teams = teams))
+}
+
+#&#39; buildGraph
+#&#39; 
+#&#39; @import DiagrammeR
+#&#39; @import V8
+#&#39; @export
+buildGraph &lt;- function(movs, teams) {
+  nodes &lt;- create_nodes(nodes = teams$team, 
+                        color = teams$secondary, 
+                        fillcolor = teams$primary, 
+                        penwidth = 10,
+                        label = FALSE,
+                        tooltip = teams$team, 
+                        width = scale_1_10(teams$pts) / 5)
+
+  edges &lt;- create_edges(from = movs$winner, 
+                        to = movs$loser, 
+                        data = movs$pts)
+
+  edges &lt;- scale_edges(edges_df = edges,
+                       to_scale = edges$data,
+                       edge_attr = &quot;penwidth&quot;,
+                       range = c(1, 5))
+
+  node_attrs &lt;- c(&quot;style = filled&quot;, &quot;shape = circle&quot;, 
+                  &quot;fontname = Helvetica&quot;)
+
+  edge_attrs &lt;- c(&quot;arrowhead = vee&quot;, 
+                  &quot;arrowsize = 1&quot;, 
+                  &quot;color = slategray&quot;)
+
+  graph_attrs &lt;- c(&quot;layout = circo&quot;,
+                   &quot;overlap = false&quot;,
+                   &quot;fixedsize = false&quot;,
+                   &quot;ranksep = 3&quot;,
+                   &quot;outputorder = edgesfirst&quot;)
+
+  create_graph(nodes_df = nodes,
+               edges_df = edges,
+               graph_attrs = graph_attrs, 
+               node_attrs = node_attrs,
+               edge_attrs = edge_attrs, 
+               graph_name = &#39;NFL 2014&#39;) %&gt;%
+    render_graph(output = &#39;SVG&#39;, width = 800, height = 800) %&gt;%
+    cat(file = &#39;graph.svg&#39;)
+}
+
+library(nflgv)
+args &lt;- loadData()
+buildGraph(args$movs, args$teams)
+</code></pre>
 
 </body>
 
