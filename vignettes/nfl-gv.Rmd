@@ -1,0 +1,31 @@
+---
+title: "NFL 2014 GraphViz"
+author: "Adam Acosta"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{NFL 2014 GraphViz}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## NFL 2014 Season with GraphViz and DiagrammeR
+
+Hover over nodes to see teams and over edges to see games.
+
+```{r, echo=FALSE}
+# library(nflgv)
+# args <- loadData()
+# buildGraph(args$movs, args$teams)
+```
+
+```{r echo=FALSE}
+knitr::asis_output(htmltools::htmlPreserve("
+<object type='image/svg+xml' data='graph.svg' 
+        height=800px width=800px></object>
+"))
+```
+
+Colors from [NFL Team Colors Codes](http://teamcolorcodes.com/category/nfl-team-color-codes/)

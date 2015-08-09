@@ -1,0 +1,17 @@
+Package: nflgv
+Title: Not much
+Version: 0.0.0.9000
+Authors@R: person("Adam", "Acosta", 
+                  email = "first.last@example.com", 
+                  role = c("aut", "cre"))
+Description: Not much
+Depends: R (>= 3.2.1)
+Imports: 
+  DiagrammeR,
+  V8,
+  magrittr,
+  dplyr
+License: GPL-3
+LazyData: true
+Suggests: knitr
+VignetteBuilder: knitr
